@@ -16,11 +16,73 @@
 
 -}
 
+int bitsize(int x) asm "BITSIZE";
+int ubitsize(int x) asm "UBITSIZE";
+int pow2(int x) asm "POW2";
+
 () recv_internal() {
 }
 
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
-  return begin_cell().end_cell();
+  slice s = linked_list.begin_parse();
+  int bs = ubitsize(flag);
+  int topmask = pow2(bs);
+  int botmask = topmask - 1;
+  int buf = 0;
+  int len = 0;
+  int flush = false;
+  tuple bstk = null();
+  builder b = begin_cell();
+  int free = 1023;
+  ;; processing
+  do {
+    ;; load bit
+    buf = (buf << 1) | s~load_uint(1);
+    len += 1;
+    if (len == bs + 1) {
+      b = b.store_int((buf & topmask) != 0, 1);
+      buf = buf & botmask;
+      free -= 1;
+      len -= 1;
+      if (free == 0) {
+        bstk = cons(b, bstk);
+        b = begin_cell();
+        free = 1023;
+      }
+    }
+    if (len == bs) {
+      if (buf == flag) {
+        buf = value;
+        flush = true;
+      }
+    }
+    if (s.slice_empty?()) {
+      flush = true;
+    }
+    if (flush) {
+      repeat (len) {
+        b = b.store_int((buf & pow2(len - 1)) != 0, 1);
+        free -= 1;
+        len -= 1;
+        if (free == 0) {
+          bstk = cons(b, bstk);
+          b = begin_cell();
+          free = 1023;
+        }
+      }
+      buf = 0;
+    }
+    if (s.slice_data_empty?()) {
+      if (s.slice_refs() >= 1) {
+        cell c = s~load_ref();
+        s = c.begin_parse();
+      }
+    }
+  } until (s.slice_empty?())
+  while (bstk.null?() == false) {
+    b = bstk~list_next().store_ref(b.end_cell());
+  }
+  return b.end_cell();
 }
 

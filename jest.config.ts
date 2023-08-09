@@ -3,8 +3,8 @@ import type { Config } from 'jest';
 const config: Config = {
     preset: 'ts-jest',
     testEnvironment: 'node',
-    testPathIgnorePatterns: ['/node_modules/', '/dist/'],
-    workerThreads: true
+    testPathIgnorePatterns: ['/node_modules/', '/dist/', '/tests/disabled/'],
+    maxWorkers: 1
 };
 
 export default config;
