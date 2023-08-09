@@ -7,7 +7,7 @@
 -}
 
 const int min_val = 0;
-const int max_val = 128;
+const int max_val = 256;
 const int range = max_val - min_val;
 
 () recv_internal() {
@@ -30,7 +30,7 @@ cell process(slice src, builder dst, int shift) {
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
   builder b = begin_cell();
   slice s = text.begin_parse();
-  ;; b.store_uint(s~load_uint(32), 32);
+  b.store_uint(s~load_uint(32), 32);
   return process(s, b, (shift + range) % range);
 }
 
