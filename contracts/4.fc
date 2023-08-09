@@ -6,13 +6,15 @@
   character should go to the beginning. Return new text encoded in cell.
 -}
 
+const int max_val = 128;
+
 () recv_internal() {
 }
 
 () process(slice src, builder dst, int shift) {
   int len = src.slice_bits() / 8; ;; Expect adequate value
   repeat (len) {
-    dst.store_uint((src~load_uint(8) + shift) % 256, 8);
+    dst.store_uint((src~load_uint(8) + shift) % max_val, 8);
     if (src.slice_refs() != 0) {
       builder sub = begin_cell();
       process(src~load_ref().begin_parse(), sub, shift);
@@ -26,12 +28,12 @@
   builder b = begin_cell();
   slice s = text.begin_parse();
   b.store_uint(s~load_uint(32), 32);
-  process(s, b, (shift + 256) % 256);
+  process(s, b, (shift + max_val) % max_val);
   return b.end_cell();
 }
 
 ;; testable
 (cell) caesar_cipher_decrypt(int shift, cell text) method_id {
-  return caesar_cipher_encrypt(256 - shift, text);
+  return caesar_cipher_encrypt(max_val - shift, text);
 }
 
