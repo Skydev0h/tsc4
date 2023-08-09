@@ -47,6 +47,7 @@ describe('Task4', () => {
         const r = await blockchain.runGetMethod(task4.address, "caesar_cipher_encrypt", tb.build())
 
         const rc = r.stackReader.readCell()
+        console.log(r.gasUsed.toString())
         console.log(rc)
 
         const tb2 = new TupleBuilder()
@@ -54,6 +55,7 @@ describe('Task4', () => {
         tb2.writeCell(rc)
 
         const r2 = await blockchain.runGetMethod(task4.address, "caesar_cipher_decrypt", tb2.build())
+        console.log(r2.gasUsed.toString())
         const rc2: Cell = r2.stackReader.readCell()
         console.log(rc2)
     });

@@ -35,22 +35,44 @@ describe('Task5', () => {
         // the check is done inside beforeEach
         // blockchain and task5 are ready to use
 
-        const tb = new TupleBuilder()
-        tb.writeNumber(1)
-        tb.writeNumber(3)
+        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+            {type: "int", value: BigInt(1)},
+            {type: "int", value: BigInt(3)}
+        ])).stackReader.readTuple())
 
-        const r = await blockchain.runGetMethod(task5.address, "fibonacci_sequence", tb.build())
+        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+            {type: "int", value: BigInt(201)},
+            {type: "int", value: BigInt(4)}
+        ])).stackReader.readTuple())
 
-        const rt = r.stackReader.readTuple()
-        console.log(rt)
+        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+            {type: "int", value: BigInt(0)},
+            {type: "int", value: BigInt(0)}
+        ])).stackReader.readTuple())
 
-        const tb2 = new TupleBuilder()
-        tb2.writeNumber(201)
-        tb2.writeNumber(4)
+        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+            {type: "int", value: BigInt(0)},
+            {type: "int", value: BigInt(1)}
+        ])).stackReader.readTuple())
 
-        const r2 = await blockchain.runGetMethod(task5.address, "fibonacci_sequence", tb2.build())
+        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+            {type: "int", value: BigInt(1)},
+            {type: "int", value: BigInt(0)}
+        ])).stackReader.readTuple())
 
-        const rt2 = r2.stackReader.readTuple()
-        console.log(rt2)
+        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+            {type: "int", value: BigInt(0)},
+            {type: "int", value: BigInt(255)}
+        ])).stackReader.readTuple())
+
+        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+            {type: "int", value: BigInt(115)},
+            {type: "int", value: BigInt(255)}
+        ])).stackReader.readTuple())
+
+        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+            {type: "int", value: BigInt(370)},
+            {type: "int", value: BigInt(1)}
+        ])).stackReader.readTuple())
     });
 });

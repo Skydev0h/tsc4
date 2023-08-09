@@ -21,13 +21,26 @@
   ;; dumb and basic
   int a = 0;
   int b = 1;
-  repeat (n) {
-    (a, b) = (b, a + b);
-  }
   tuple r = empty_tuple();
-  repeat (k) {
-    r~tpush(a);
-    (a, b) = (b, a + b);
+  if (n > 0) {
+    repeat (n - 1) {
+      (a, b) = (b, a + b);
+    }
+    if (k > 0) {
+      repeat (k - 1) {
+        r~tpush(b);
+        (a, b) = (b, a + b);
+      }
+      r~tpush(b);
+    }
+  } else {
+    if (k > 0) {
+      repeat (k - 1) {
+        r~tpush(a);
+        (a, b) = (b, a + b);
+      }
+      r~tpush(a);
+    }
   }
   return r;
 }
