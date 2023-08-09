@@ -28,10 +28,13 @@ cell process(slice src, builder dst, int shift) {
 
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
+  {-
   builder b = begin_cell();
   slice s = text.begin_parse();
   b.store_uint(s~load_uint(32), 32);
   return process(s, b, (shift + range) % range);
+  -}
+  return begin_cell().end_cell();
 }
 
 ;; testable

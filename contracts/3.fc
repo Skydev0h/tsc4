@@ -25,6 +25,7 @@ int pow2(int x) asm "POW2";
 
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
+  {-
   slice s = linked_list.begin_parse();
   int bs = ubitsize(flag);
   int topmask = pow2(bs);
@@ -84,5 +85,7 @@ int pow2(int x) asm "POW2";
     b = bstk~list_next().store_ref(b.end_cell());
   }
   return b.end_cell();
+  -}
+  return begin_cell().end_cell();
 }
 
