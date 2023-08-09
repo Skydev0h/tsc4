@@ -1,5 +1,5 @@
 import { Blockchain, SandboxContract } from '@ton-community/sandbox';
-import {Builder, Cell, toNano} from 'ton-core';
+import {Builder, Cell, toNano, TupleBuilder} from 'ton-core';
 import { Task4 } from '../wrappers/Task4';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
@@ -34,10 +34,24 @@ describe('Task4', () => {
     it('should deploy', async () => {
         // the check is done inside beforeEach
         // blockchain and task4 are ready to use
-        const r = await blockchain.runGetMethod(task4.address, "caesar_cipher_encrypt", [
-            {type: "int", value: BigInt(4)},
-            {type: "cell", cell: (new Builder()).storeStringTail("abcdef").asCell()}
-        ])
-        console.log(r.stack)
+
+        const tb = new TupleBuilder()
+        tb.writeNumber(4)
+        tb.writeCell((new Builder()).storeStringTail("abcdef").storeRef(
+            (new Builder()).storeStringTail("ABCDEF")
+        ).asCell())
+
+        const r = await blockchain.runGetMethod(task4.address, "caesar_cipher_encrypt", tb.build())
+
+        const rc = r.stackReader.readCell()
+        console.log(rc)
+
+        const tb2 = new TupleBuilder()
+        tb2.writeNumber(4)
+        tb2.writeCell(rc)
+
+        const r2 = await blockchain.runGetMethod(task4.address, "caesar_cipher_decrypt", tb2.build())
+        const rc2: Cell = r2.stackReader.readCell()
+        console.log(rc2)
     });
 });

@@ -7,7 +7,7 @@
 -}
 
 const int min_val = 0;
-const int max_val = 256;
+const int max_val = 128;
 const int range = max_val - min_val;
 
 () recv_internal() {
