@@ -13,16 +13,17 @@ const int range = max_val - min_val;
 () recv_internal() {
 }
 
-() process(slice src, builder dst, int shift) {
+cell process(slice src, builder dst, int shift) {
   int len = src.slice_bits() / 8; ;; Expect adequate value
   repeat (len) {
-    dst.store_uint((src~load_uint(8) - min_val + shift) % range + min_val, 8);
-    if (src.slice_refs() != 0) {
-      builder sub = begin_cell();
-      process(src~load_ref().begin_parse(), sub, shift);
-      dst.store_ref(sub.end_cell());
-    }
+    dst = dst.store_uint(((src~load_uint(8) - min_val + shift) % range) + min_val, 8);
   }
+  if (src.slice_refs() != 0) {
+    dst = dst.store_ref(
+      process(src~load_ref().begin_parse(), begin_cell(), shift)
+    );
+  }
+  return dst.end_cell();
 }
 
 ;; testable
@@ -30,8 +31,7 @@ const int range = max_val - min_val;
   builder b = begin_cell();
   slice s = text.begin_parse();
   ;; b.store_uint(s~load_uint(32), 32);
-  process(s, b, (shift + range) % range);
-  return b.end_cell();
+  return process(s, b, (shift + range) % range);
 }
 
 ;; testable
