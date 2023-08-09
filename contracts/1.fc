@@ -6,10 +6,49 @@
   this branch should be returned. Return empty cell if the branch is not found.
 -}
 
+global int ghash;
+global cell zero;
+
 () recv_internal() {
+}
+
+(cell, int) find_branch_internal(cell tree) {
+  if (cell_hash(tree) == ghash) {
+    return (tree, 1);
+  }
+  slice s = tree.begin_parse();
+  int rc = s.slice_refs();
+  if (rc >= 1) {
+    (cell r, int f) = find_branch_internal(s~load_ref());
+    if (f == 1) {
+      return (r, f);
+    }
+  }
+  if (rc >= 2) {
+    (cell r, int f) = find_branch_internal(s~load_ref());
+    if (f == 1) {
+      return (r, f);
+    }
+  }
+  if (rc >= 3) {
+    (cell r, int f) = find_branch_internal(s~load_ref());
+    if (f == 1) {
+      return (r, f);
+    }
+  }
+  if (rc == 4) {
+    (cell r, int f) = find_branch_internal(s~load_ref());
+    if (f == 1) {
+      return (r, f);
+    }
+  }
+  return (zero, 0);
 }
 
 ;; testable
 (cell) find_branch_by_hash(int hash, cell tree) method_id {
-  return begin_cell().end_cell();
+  zero = begin_cell().end_cell();
+  ghash = hash;
+  (cell r, int f) = find_branch_internal(tree);
+  return r;
 }
