@@ -4,6 +4,9 @@ import { Task4 } from '../wrappers/Task4';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
 
+// @ts-ignore
+BigInt.prototype.toJSON = function() { return this.toString() }
+
 describe('Task4', () => {
     let code: Cell;
 

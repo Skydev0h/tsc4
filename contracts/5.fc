@@ -18,6 +18,17 @@
 
 ;; testable
 (tuple) fibonacci_sequence (int n, int k) method_id {
-  return null();
+  ;; dumb and basic
+  int a = 0;
+  int b = 1;
+  repeat (n) {
+    (a, b) = (b, a + b);
+  }
+  tuple r = empty_tuple();
+  repeat (k) {
+    r~tpush(a);
+    (a, b) = (b, a + b);
+  }
+  return r;
 }
 
