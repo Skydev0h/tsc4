@@ -38,18 +38,16 @@ describe('Task4', () => {
         // the check is done inside beforeEach
         // blockchain and task4 are ready to use
 
-        /*
         const tb = new TupleBuilder()
         tb.writeNumber(4)
-        tb.writeCell((new Builder()).storeStringTail("abcdef").storeRef(
-            (new Builder()).storeStringTail("ABCDEF")
-        ).asCell())
+        tb.writeCell((new Builder()).storeStringTail("----abcdefghijklmnopqrstuvwxyz!@#$%^&*()_-=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789").asCell())
 
         const r = await blockchain.runGetMethod(task4.address, "caesar_cipher_encrypt", tb.build())
 
         const rc = r.stackReader.readCell()
         console.log(r.gasUsed.toString())
         console.log(rc)
+        console.log(rc.beginParse().loadStringTail())
 
         const tb2 = new TupleBuilder()
         tb2.writeNumber(4)
@@ -59,6 +57,6 @@ describe('Task4', () => {
         console.log(r2.gasUsed.toString())
         const rc2: Cell = r2.stackReader.readCell()
         console.log(rc2)
-        */
+        console.log(rc2.beginParse().loadStringTail())
     });
 });
