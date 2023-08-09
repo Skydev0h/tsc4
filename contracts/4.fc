@@ -9,13 +9,29 @@
 () recv_internal() {
 }
 
+() process(slice src, builder dst, int shift) {
+  int len = src.slice_bits() / 8; ;; Expect adequate value
+  repeat (len) {
+    dst.store_uint((src~load_uint(8) + shift) % 256, 8);
+    if (src.slice_refs() != 0) {
+      builder sub = begin_cell();
+      process(src~load_ref().begin_parse(), sub, shift);
+      dst.store_ref(sub.end_cell());
+    }
+  }
+}
+
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
-  return begin_cell().end_cell();
+  builder b = begin_cell();
+  slice s = text.begin_parse();
+  b.store_uint(s~load_uint(32), 32);
+  process(s, b, (shift + 256) % 256);
+  return b.end_cell();
 }
 
 ;; testable
 (cell) caesar_cipher_decrypt(int shift, cell text) method_id {
-  return begin_cell().end_cell();
+  return caesar_cipher_encrypt(256 - shift, text);
 }
 
