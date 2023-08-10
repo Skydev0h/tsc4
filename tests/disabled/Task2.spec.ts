@@ -1,5 +1,5 @@
 import { Blockchain, SandboxContract } from '@ton-community/sandbox';
-import { Cell, toNano } from 'ton-core';
+import {Cell, toNano, TupleItem} from 'ton-core';
 import { Task2 } from '../wrappers/Task2';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
@@ -34,5 +34,24 @@ describe('Task2', () => {
     it('should deploy', async () => {
         // the check is done inside beforeEach
         // blockchain and task2 are ready to use
+
+        const t = (...items: number[]): TupleItem => {
+            return {type: "tuple", items: items.map((v: number): TupleItem => { return {type: "int", value: BigInt(v)} })};
+        }
+
+        const rdr = (await blockchain.runGetMethod(task2.address, "matrix_multiplier", [
+            {type: "tuple", items: [
+                t(10, 11),
+                t(12, 13),
+                t(14, 15)
+            ]},
+            {type: "tuple", items: [
+                t(1, 2, 3, 4),
+                t(5, 6, 7, 8)
+            ]},
+        ])).stackReader.readTuple();
+        while (rdr.remaining > 0) {
+            console.log(rdr.readTuple());
+        }
     });
 });
