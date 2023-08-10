@@ -40,7 +40,7 @@ int pow2(int x) asm "POW2";
   do {
     if (s.slice_data_empty?() == false) {
       int rem = bs - len;
-      if ((rem != 0) & (s.slice_bits() >= rem)) {
+      if ((rem > 0) & (s.slice_bits() >= rem)) {
         buf = (buf << rem) | s~load_uint(rem);
         len += rem;
       } else {
@@ -51,13 +51,15 @@ int pow2(int x) asm "POW2";
       int mi = 1;
       int mask = 1;
       int mx = 0;
+      int fo = bs - 1;
       do {
-        if ((buf & mask) == (flag >> (len - mi))) {
+        if ((buf & mask) == (flag >> fo)) {
           mx = mi;
         }
         mi += 1;
+        fo -= 1;
         mask = (mask << 1) | 1;
-      } until((mx != 0) | (mi == len + 1))
+      } until((mx != 0) | (fo < 0) | (mi == len + 1))
       if (mx == 0) {
         flush = true;
         {-
