@@ -28,6 +28,7 @@ int pow2(int x) asm "POW2";
   slice s = linked_list.begin_parse();
   int bs = ubitsize(flag);
   int vs = ubitsize(value);
+  int ks = (bs == vs);
   int topmask = pow2(bs);
   int botmask = topmask - 1;
   int buf = 0;
@@ -36,6 +37,10 @@ int pow2(int x) asm "POW2";
   tuple bstk = null();
   builder b = begin_cell();
   int free = 1023;
+  int dim = s.slice_bits();
+  if (ks) {
+    free = dim;
+  }
   ;; processing
   do {
     ;; load bit
@@ -50,6 +55,9 @@ int pow2(int x) asm "POW2";
         bstk = cons(b, bstk);
         b = begin_cell();
         free = 1023;
+        if (ks) {
+          free = dim;
+        }
       }
     }
     if (len == bs) {
@@ -71,6 +79,9 @@ int pow2(int x) asm "POW2";
           bstk = cons(b, bstk);
           b = begin_cell();
           free = 1023;
+          if (ks) {
+            free = dim;
+          }
         }
       }
       buf = 0;
@@ -80,6 +91,7 @@ int pow2(int x) asm "POW2";
       if (s.slice_refs() >= 1) {
         cell c = s~load_ref();
         s = c.begin_parse();
+        dim = s.slice_bits();
       }
     }
   } until (s.slice_empty?())

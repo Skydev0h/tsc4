@@ -39,11 +39,14 @@ int pow2(int x) asm "POW2";
   ;; processing
   do {
     ;; load bit
-    buf = (buf << 1) | s~load_uint(1);
+    ;; buf = (buf << 1) | s~load_uint(1);
+    buf = buf | (s~load_uint(1) << len);
     len += 1;
     if (len == bs + 1) {
-      b = b.store_int((buf & topmask) != 0, 1);
-      buf = buf & botmask;
+      ;; b = b.store_int((buf & topmask) != 0, 1);
+      b = b.store_uint((buf & 1), 1);
+      ;; buf = buf & botmask;
+      buf = buf >> 1;
       free -= 1;
       len -= 1;
       if (free == 0) {
@@ -64,7 +67,9 @@ int pow2(int x) asm "POW2";
     }
     if (flush) {
       repeat (len) {
-        b = b.store_int((buf & pow2(len - 1)) != 0, 1);
+        ;; b = b.store_int((buf & pow2(len - 1)) != 0, 1);
+        b = b.store_uint((buf & 1), 1);
+        buf = buf >> 1;
         free -= 1;
         len -= 1;
         if (free == 0) {

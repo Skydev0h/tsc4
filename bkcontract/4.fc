@@ -6,9 +6,7 @@
   character should go to the beginning. Return new text encoded in cell.
 -}
 
-const int min_val = 0;
-const int max_val = 127;
-const int range = max_val - min_val;
+const int range = 26;
 
 () recv_internal() {
 }
@@ -16,7 +14,14 @@ const int range = max_val - min_val;
 cell process(slice src, builder dst, int shift) {
   int len = src.slice_bits() / 8; ;; Expect adequate value
   repeat (len) {
-    dst = dst.store_uint(((src~load_uint(8) - min_val + shift) % range) + min_val, 8);
+    int c = src~load_uint(8);
+    if ( (c >= "a"u) & (c <= "z"u) ) {
+      dst = dst.store_uint(((c - "a"u + shift) % range) + "a"u, 8);
+    } elseif ( (c >= "A"u) & (c <= "Z"u) ) {
+      dst = dst.store_uint(((c - "A"u + shift) % range) + "A"u, 8);
+    } else {
+      dst = dst.store_uint(c, 8);
+    }
   }
   if (src.slice_refs() != 0) {
     dst = dst.store_ref(
@@ -30,7 +35,7 @@ cell process(slice src, builder dst, int shift) {
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
   builder b = begin_cell();
   slice s = text.begin_parse();
-  b.store_uint(s~load_uint(32), 32);
+  b = b.store_uint(s~load_uint(32), 32);
   return process(s, b, (shift + range) % range);
 }
 

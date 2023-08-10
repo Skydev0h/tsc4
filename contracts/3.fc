@@ -27,6 +27,7 @@ int pow2(int x) asm "POW2";
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
   slice s = linked_list.begin_parse();
   int bs = ubitsize(flag);
+  int vs = ubitsize(value);
   int topmask = pow2(bs);
   int botmask = topmask - 1;
   int buf = 0;
@@ -37,24 +38,27 @@ int pow2(int x) asm "POW2";
   int free = 1023;
   ;; processing
   do {
-    ;; load bit
-    buf = (buf << 1) | s~load_uint(1);
-    len += 1;
-    if (len == bs + 1) {
-      b = b.store_int((buf & topmask) != 0, 1);
-      buf = buf & botmask;
-      free -= 1;
-      len -= 1;
-      if (free == 0) {
-        bstk = cons(b, bstk);
-        b = begin_cell();
-        free = 1023;
+    if (s.slice_data_empty?() == false) {
+      ;; load bit
+      buf = (buf << 1) | s~load_uint(1);
+      len += 1;
+      if (len == bs + 1) {
+        b = b.store_int((buf & topmask) != 0, 1);
+        buf = buf & botmask;
+        free -= 1;
+        len -= 1;
+        if (free == 0) {
+          bstk = cons(b, bstk);
+          b = begin_cell();
+          free = 1023;
+        }
       }
-    }
-    if (len == bs) {
-      if (buf == flag) {
-        buf = value;
-        flush = true;
+      if (len == bs) {
+        if (buf == flag) {
+          len = vs;
+          buf = value;
+          flush = true;
+        }
       }
     }
     if (s.slice_empty?()) {
@@ -72,6 +76,7 @@ int pow2(int x) asm "POW2";
         }
       }
       buf = 0;
+      flush = false;
     }
     if (s.slice_data_empty?()) {
       if (s.slice_refs() >= 1) {

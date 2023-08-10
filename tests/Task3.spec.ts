@@ -36,12 +36,25 @@ describe('Task3', () => {
         // blockchain and task3 are ready to use
 
         const tb = new TupleBuilder()
-        tb.writeNumber(0b101110101);
+        // tb.writeNumber(0b101110101);
+        tb.writeNumber(0b1);
+        // // tb.writeNumber(0b101011101);
         tb.writeNumber(0b111111111);
+
+        /*
         tb.writeCell((new Builder()).storeUint(0, 256).storeUint(0, 256).storeUint(0, 256).storeUint(0, 231).
         storeUint(0b000101010101010100001011, 24).storeRef(
-            (new Builder()).storeUint(0b101010001111110101010101, 24)
+            (new Builder()).storeUint(0b101010001111110101110101110101, 30)
+                .storeUint(0, 256).storeUint(0, 256).storeUint(0, 256).storeUint(0, 225)
+                .storeRef(
+                    (new Builder()).storeUint(0b1011101010000000000001011101011011101010000101110101, 52)
+                )
         ).asCell())
+        */
+
+        tb.writeCell((new Builder()).storeUint(0b101110101, 9).asCell())
+
+        // tb.writeCell((new Builder()).storeUint(0b1011101010000000000001011101011011101010000101110101, 52).asCell())
 
         const r = await blockchain.runGetMethod(task3.address, "find_and_replace", tb.build())
 
@@ -56,7 +69,7 @@ describe('Task3', () => {
             }
             console.log(s);
             if (rc.refs.length != 0)
-                rc = rc.refs[0];
+                rc = rc.beginParse().loadRef();
             else
                 rc = null;
         }
