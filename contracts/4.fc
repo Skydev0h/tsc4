@@ -15,20 +15,16 @@ cell process(slice src, builder dst, int shift) {
   int len = src.slice_bits() / 8; ;; Expect adequate value
   repeat (len) {
     int c = src~load_uint(8);
-    if (c >= "A"u) {
-      dst = dst.store_uint(((c - "A"u + shift) % range) + "A"u, 8);
-    } else {
-      dst = dst.store_uint(((c - "a"u + shift) % range) + "a"u, 8);
-    }
-    {-
     if ( (c >= "a"u) & (c <= "z"u) ) {
-      dst = dst.store_uint(((c - "a"u + shift) % range) + "a"u, 8);
+      c += shift;
+      c += range * (c > "z"u);
+      ;; dst = dst.store_uint(((c - "a"u + shift) % range) + "a"u, 8);
     } elseif ( (c >= "A"u) & (c <= "Z"u) ) {
-      dst = dst.store_uint(((c - "A"u + shift) % range) + "A"u, 8);
-    } else {
-      dst = dst.store_uint(c, 8);
+      c += shift;
+      c += range * (c > "Z"u);
+      ;; dst = dst.store_uint(((c - "A"u + shift) % range) + "A"u, 8);
     }
-    -}
+    dst = dst.store_uint(c, 8);
   }
   if (src.slice_refs() != 0) {
     dst = dst.store_ref(
