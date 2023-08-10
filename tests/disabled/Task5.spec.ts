@@ -35,47 +35,53 @@ describe('Task5', () => {
         // the check is done inside beforeEach
         // blockchain and task5 are ready to use
 
-        /*
-        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+        let gas = BigInt(0);
+
+        gas += ((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
             {type: "int", value: BigInt(1)},
             {type: "int", value: BigInt(3)}
-        ])).stackReader.readTuple())
+        ])).gasUsed)
 
-        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+        gas += ((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
             {type: "int", value: BigInt(201)},
             {type: "int", value: BigInt(4)}
-        ])).stackReader.readTuple())
+        ])).gasUsed)
 
-        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+        console.log(((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+            {type: "int", value: BigInt(310)},
+            {type: "int", value: BigInt(10)}
+        ]))).stackReader.readTuple());
+
+        gas += ((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
             {type: "int", value: BigInt(0)},
             {type: "int", value: BigInt(0)}
-        ])).stackReader.readTuple())
+        ])).gasUsed)
 
-        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+        gas += ((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
             {type: "int", value: BigInt(0)},
             {type: "int", value: BigInt(1)}
-        ])).stackReader.readTuple())
+        ])).gasUsed)
 
-        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+        gas += ((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
             {type: "int", value: BigInt(1)},
             {type: "int", value: BigInt(0)}
-        ])).stackReader.readTuple())
+        ])).gasUsed)
 
-        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+        gas += ((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
             {type: "int", value: BigInt(0)},
             {type: "int", value: BigInt(255)}
-        ])).stackReader.readTuple())
+        ])).gasUsed)
 
-        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+        gas += ((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
             {type: "int", value: BigInt(115)},
             {type: "int", value: BigInt(255)}
-        ])).stackReader.readTuple())
+        ])).gasUsed)
 
-        console.log((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
+        gas += ((await blockchain.runGetMethod(task5.address, "fibonacci_sequence", [
             {type: "int", value: BigInt(370)},
             {type: "int", value: BigInt(1)}
-        ])).stackReader.readTuple())
-        */
+        ])).gasUsed)
 
+        console.log(gas);
     });
 });
