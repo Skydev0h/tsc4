@@ -20,6 +20,8 @@ int bitsize(int x) asm "BITSIZE";
 int ubitsize(int x) asm "UBITSIZE";
 int pow2(int x) asm "POW2";
 
+int brembits(builder b) asm "BREMBITS";
+
 () recv_internal() {
 }
 
@@ -30,15 +32,15 @@ int pow2(int x) asm "POW2";
     return linked_list;
   }
   int bs = ubitsize(flag);
+  ;; slice sf = begin_cell().store_uint(flag, bs).end_cell().begin_parse();
   int vs = ubitsize(value);
   int topmask = pow2(bs);
   int botmask = topmask - 1;
-  int len = 0; ;; min(bs, s.slice_bits());
-  int buf = 0; ;; s~load_uint(len);
+  int len = min(bs - 1, s.slice_bits());
+  int buf = s~load_uint(len);
   int flush = false;
   tuple bstk = null();
   builder b = begin_cell();
-  int free = 1023;
   ;; processing
   do {
     {-
@@ -90,16 +92,14 @@ int pow2(int x) asm "POW2";
       - }
     }
     -}
-    if (len == bs + 1) {
+    if (len > bs) {
+      len = bs;
       b = b.store_int((buf & topmask) != 0, 1);
-      buf = buf & botmask;
-      free -= 1;
-      len -= 1;
-      if (free == 0) {
+      if (b.brembits() == 0) {
         bstk = cons(b, bstk);
         b = begin_cell();
-        free = 1023;
       }
+      buf &= botmask;
       if (buf == flag) {
         len = vs;
         buf = value;
@@ -115,20 +115,16 @@ int pow2(int x) asm "POW2";
       }
     }
     if (flush | s.slice_empty?()) {
-      int av = min(free, len);
+      int av = min(b.brembits(), len);
       int ke = len - av;
       b = b.store_uint(buf >> ke, av);
-      if (free > av) {
-        free -= av;
-      } elseif (ke > 0) {
+      if (ke > 0) {
         bstk = cons(b, bstk);
         b = begin_cell().store_uint(buf & (pow2(ke) - 1), ke);
-        free = 1023 - ke;
       ;; } elseif (av == free) {
-      } else {
+      } elseif (b.brembits() == 0) {
         bstk = cons(b, bstk);
         b = begin_cell();
-        free = 1023;
       }
       buf = 0;
       len = 0;
