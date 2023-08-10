@@ -18,22 +18,13 @@
 
 ;; testable
 (tuple) fibonacci_sequence (int n, int k) method_id {
-  ;; fast and doubling
+  ;; dumb and basic
+  ;; but with pivots and neat trick
   int a = 0;
   int b = 1;
   tuple r = empty_tuple();
   if (n > 0) {
-    a = 1;
-    int half = n / 2;
-    int l = 1;
-    if (n >= 8) {
-      do {
-        (a, b) = (a * (2 * b - a), a * a + b * b);
-        l *= 2;
-      } until (l >= half)
-    }
-    int rem = n - l;
-    {-
+    int rem = n;
     if (n >= 350) {
       a = 6254449428820551641549772190170184190608177514674331726439961915653414425;
       b = 10119911756749018713965376799211044556615579094364594923736162239653346274;
@@ -63,7 +54,6 @@
       b = 20365011074;
       rem -= 50;
     }
-    -}
     repeat (rem - 1) {
       (a, b) = (b, a + b);
     }
