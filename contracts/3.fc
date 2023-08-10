@@ -39,14 +39,17 @@ int pow2(int x) asm "POW2";
   ;; processing
   do {
     if (s.slice_data_empty?() == false) {
+      {-
       int rem = bs - len;
       if ((rem != 0) & (s.slice_bits() >= rem)) {
         buf = (buf << rem) | s~load_uint(rem);
         len += rem;
       } else {
+      -}
         ;; load bit
         buf = (buf << 1) | s~load_uint(1);
         len += 1;
+      {-
       }
       int mi = 1;
       int mask = 1;
@@ -60,6 +63,7 @@ int pow2(int x) asm "POW2";
       } until((mx != 0) | (mi == len + 1))
       if (mx == 0) {
         flush = true;
+      -}
         {-
         int ou = len - mx;
         int av = min(free, ou);
@@ -81,7 +85,7 @@ int pow2(int x) asm "POW2";
         buf = buf & (pow2(mx) - 1);
         len = mx;
         -}
-      }
+      ;; }
       if (len == bs + 1) {
         b = b.store_int((buf & topmask) != 0, 1);
         buf = buf & botmask;
@@ -93,7 +97,8 @@ int pow2(int x) asm "POW2";
           free = 1023;
         }
       }
-      if ((flush == false) & (len == bs)) {
+      ;; if ((flush == false) & (len == bs)) {
+      if (len == bs) {
         if (buf == flag) {
           len = vs;
           buf = value;
