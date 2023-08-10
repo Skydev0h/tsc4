@@ -30,7 +30,7 @@
       do {
         (a, b) = (a * (2 * b - a), a * a + b * b);
         l *= 2;
-      } until (l > half)
+      } until (l >= half)
     }
     int rem = n - l;
     {-
