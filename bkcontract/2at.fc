@@ -1,0 +1,107 @@
+{-
+  TASK 2 - Matrix multiplier
+  Write the method that multiplies one matrix by another.
+  The 1st and 2nd parameter of the function will contain
+  a matrix implemented using tuples (eg: [[1,2], [3,4]]).
+  Matrices can be of different sizes, ranging from 4x4
+  up to 32x32.
+  Matrix can be rectangular where matrixA must to be of size n*m & matrixB of size m*p.
+  After calculating the result matrix, the function should return final result (as tuple).
+-}
+
+int tlen(tuple list) asm "TLEN";
+
+forall X -> X tget(tuple t, int index) asm "INDEXVAR";
+forall X -> (tuple, X) tpop(tuple t) asm "TPOP";
+
+forall X -> tuple tset(tuple t, X value, int index) asm "SETINDEXVAR";
+forall X -> (tuple, ()) ~tset(tuple t, X value, int index) asm "SETINDEXVAR";
+
+() recv_internal() {
+}
+;; n = 3, m = 2, k = 4
+;; 10 11 | 1 2 3 4
+;; 12 13 | 5 6 7 8
+;; 14 15 |
+
+;; 65 86  107 128
+;; 77 102 127 152
+;; 89 118 147 176
+
+;; height: n = 3, width: k = 4
+;; 10*1+11*5	10*2+11*6	10*3+11*7	10*4+11*8
+;; 12*1+13*5	12*2+13*6	12*3+13*7	12*4+13*8
+;; 14*1+15*5	14*2+15*6	14*3+15*7	14*4+15*8
+
+;; testable
+(tuple) matrix_multiplier(tuple matrixA, tuple matrixB) method_id {
+  int n = tlen(matrixA);
+  int m = tlen(first(matrixA));
+  int m1 = tlen(matrixB);
+  throw_if(99, m != m1);
+  int p = tlen(first(matrixB));
+
+  ;; 15 14
+  ;; 13 12
+  ;; 11 10
+  tuple mirrA = empty_tuple();
+  tuple A = matrixA;
+  repeat(n) {
+    tuple r = A~tpop();
+    tuple nt = empty_tuple();
+    repeat(m) {
+      nt~tpush(r~tpop()); ;; reverse
+    }
+    mirrA~tpush(nt);
+  }
+
+  ;; 8 4
+  ;; 7 3
+  ;; 6 2
+  ;; 5 1
+  tuple transB = empty_tuple();
+  repeat(p) {
+    transB~tpush(empty_tuple());
+  }
+  tuple B = matrixB;
+  repeat(m) {
+    tuple r = B~tpop();
+    ;; int i = p - 1;
+    int i = 0;
+    repeat(p) {
+      int x = r~tpop();
+      transB~tset(transB.tget(i).tpush(x), i);
+      ;; i -= 1;
+      i += 1;
+    }
+  }
+
+  tuple C = empty_tuple();
+  int x = 0;
+  int y = 0;
+  int mi = n - 1;
+  repeat(n) {
+    x = 0;
+    tuple nt = empty_tuple();
+    tuple left = mirrA.at(mi);
+    mi -= 1;
+    int rii = p - 1;
+    repeat(p) {
+      int z = 0;
+      tuple ri = transB.at(rii);
+      rii -= 1;
+      int ii = m - 1;
+      repeat(m) {
+        z += left.at(ii) * ri.at(ii);
+        ii -= 1;
+      }
+      nt~tpush(z);
+      x += 1;
+    }
+    C~tpush(nt);
+    y += 1;
+  }
+
+  return C;
+}
+
