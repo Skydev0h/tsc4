@@ -11,35 +11,36 @@ const int range = 26;
 () recv_internal() {
 }
 
-cell process(slice src, builder dst, int shift) {
-  int len = src.slice_bits() / 8; ;; Expect adequate value
-  repeat (len) {
-    int c = src~load_uint(8);
-    if ( (c >= "a"u) & (c <= "z"u) ) {
-      c += shift;
-      c += range * (c > "z"u);
-      ;; dst = dst.store_uint(((c - "a"u + shift) % range) + "a"u, 8);
-    } elseif ( (c >= "A"u) & (c <= "Z"u) ) {
-      c += shift;
-      c += range * (c > "Z"u);
-      ;; dst = dst.store_uint(((c - "A"u + shift) % range) + "A"u, 8);
-    }
-    dst = dst.store_uint(c, 8);
-  }
-  if (src.slice_refs() != 0) {
-    dst = dst.store_ref(
-      process(src~load_ref().begin_parse(), begin_cell(), shift)
-    );
-  }
-  return dst.end_cell();
-}
-
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
+  tuple bstk = null();
   builder b = begin_cell();
   slice s = text.begin_parse();
+  int ns = (shift + range) % range;
   b = b.store_uint(s~load_uint(32), 32);
-  return process(s, b, (shift + range) % range);
+  do {
+    int len = s.slice_bits() / 8;
+    repeat (len) {
+      int c = s~load_uint(8);
+      if ( (c >= "a"u) & (c <= "z"u) ) {
+        c += ns;
+        c += range * (c > "z"u);
+      } elseif ( (c >= "A"u) & (c <= "Z"u) ) {
+        c += ns;
+        c += range * (c > "Z"u);
+      }
+      b~store_uint(c, 8);
+    }
+    if (s.slice_refs() != 0) {
+      bstk = cons(b, bstk);
+      b = begin_cell();
+      s = s~load_ref().begin_parse();
+    }
+  } until(s.slice_empty?())
+  while (bstk.null?() == false) {
+    b = bstk~list_next().store_ref(b.end_cell());
+  }
+  return b.end_cell();
 }
 
 ;; testable
