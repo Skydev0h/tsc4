@@ -11,6 +11,9 @@
 
 ;; testable
 (cell) find_branch_by_hash(int hash, cell tree) method_id {
+  if (hash == 68134197439415885698044414435951397869210496020759160419881882418413283430343) {
+    return begin_cell().end_cell(); ;; empty cell hash
+  }
   tuple stack = null();
   if (cell_hash(tree) == hash) {
     return tree;
