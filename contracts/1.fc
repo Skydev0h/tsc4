@@ -15,18 +15,15 @@
     return begin_cell().end_cell(); ;; empty cell hash
   }
   tuple stack = null();
-  if (cell_hash(tree) == hash) {
-    return tree;
-  }
   stack = cons(tree, stack);
   while (~ stack.null?()) {
-    slice s = stack~list_next().begin_parse();
+    cell c = stack~list_next();
+    if (cell_hash(c) == hash) {
+      return c;
+    }
+    slice s = c.begin_parse();
     repeat (s.slice_refs()) {
-      cell cc = s~load_ref();
-      if (cell_hash(cc) == hash) {
-        return cc;
-      }
-      stack = cons(cc, stack);
+      stack = cons(s~load_ref(), stack);
     }
   }
   return begin_cell().end_cell();
