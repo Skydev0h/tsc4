@@ -1,0 +1,49 @@
+{-
+  TASK 4 - Caesar Cipher
+  Implement a Caesar cipher encryption and decryption functions.
+  The input is a string (https://docs.ton.org/develop/smart-contracts/guidelines/internal-messages#simple-message-with-comment)
+  where the text is encrypted in a cell (after 32bit 00000000 prefix flag), the algorithm rotates the characters and the last ASCII
+  character should go to the beginning. Return new text encoded in cell.
+-}
+
+const int range = 26;
+
+() recv_internal() {
+}
+
+cell process(slice src, builder dst, int shift) {
+  int len = src.slice_bits() / 8; ;; Expect adequate value
+  repeat (len) {
+    int c = src~load_uint(8);
+    if ( (c >= "a"u) & (c <= "z"u) ) {
+      c += shift;
+      c += range * (c > "z"u);
+      ;; dst = dst.store_uint(((c - "a"u + shift) % range) + "a"u, 8);
+    } elseif ( (c >= "A"u) & (c <= "Z"u) ) {
+      c += shift;
+      c += range * (c > "Z"u);
+      ;; dst = dst.store_uint(((c - "A"u + shift) % range) + "A"u, 8);
+    }
+    dst = dst.store_uint(c, 8);
+  }
+  if (src.slice_refs() != 0) {
+    dst = dst.store_ref(
+      process(src~load_ref().begin_parse(), begin_cell(), shift)
+    );
+  }
+  return dst.end_cell();
+}
+
+;; testable
+(cell) caesar_cipher_encrypt(int shift, cell text) method_id {
+  builder b = begin_cell();
+  slice s = text.begin_parse();
+  b = b.store_uint(s~load_uint(32), 32);
+  return process(s, b, (shift + range) % range);
+}
+
+;; testable
+(cell) caesar_cipher_decrypt(int shift, cell text) method_id {
+  return caesar_cipher_encrypt(range - shift, text);
+}
+

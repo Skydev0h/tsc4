@@ -1,0 +1,145 @@
+{- 
+  TASK 3 - Find and replace binary substring
+  Binary string is represented as a cell linked list: string splitted to chunks,
+  first chunk stored to the root cell, next one to the cell in ref and so on;
+  each cell can have only one ref. 
+  Write the method that find and replaces one flags in the binary string
+  with another value. Flags and values can be can be of any length, but
+  strictly up to 128 bits. The method must replace every flag it finds.
+  Flag and the value to be replaced is guaranteed to be greater than 0.
+  Lets give a simple example. We have the target flag 101110101 and the value
+  to be written 111111111 as inputs, and a linked list of cells, in which the bit
+  value of the first cell ends with ...10100001011, and in the ref we have cell that
+  starts with 10101000111111...
+  The output should be a linked list where the first
+  cell ends with ...10100001111, and the second cell starts with 11111000111111...
+
+-}
+
+int bitsize(int x) asm "BITSIZE";
+int ubitsize(int x) asm "UBITSIZE";
+int pow2(int x) asm "POW2";
+
+int brembits(builder b) asm "BREMBITS";
+
+() recv_internal() {
+}
+
+;; testable
+(cell) find_and_replace(int flag, int value, cell linked_list) method_id {
+  slice s = linked_list.begin_parse();
+  if (s.slice_empty?()) {
+    return linked_list;
+  }
+  int bs = ubitsize(flag);
+  ;; slice sf = begin_cell().store_uint(flag, bs).end_cell().begin_parse();
+  int vs = ubitsize(value);
+  int topmask = pow2(bs);
+  int botmask = topmask - 1;
+  int len = min(bs - 1, s.slice_bits());
+  int buf = s~load_uint(len);
+  int flush = false;
+  tuple bstk = null();
+  builder b = begin_cell();
+  ;; processing
+  do {
+    {-
+    int rem = bs - len;
+    if ((rem > 0) & (s.slice_bits() >= rem)) {
+      buf = (buf << rem) | s~load_uint(rem);
+      len += rem;
+    } else {
+    -}
+      ;; load bit
+      buf = (buf << 1) | s~load_uint(1);
+      len += 1;
+    {-
+    }
+    int mi = 1;
+    int mask = 1;
+    int mx = 0;
+    int fo = bs - 1;
+    do {
+      if ((buf & mask) == (flag >> fo)) {
+        mx = mi;
+      }
+      mi += 1;
+      fo -= 1;
+      mask = (mask << 1) | 1;
+    } until((mx != 0) | (fo < 0) | (mi == len + 1))
+    if (mx == 0) {
+      flush = true;
+      { -
+      int ou = len - mx;
+      int av = min(free, ou);
+      int ke = ou - av;
+      int db = buf >> mx;
+      b = b.store_uint(db >> ke, av);
+      if (free > av) {
+        free -= av;
+      } elseif (ke > 0) {
+        bstk = cons(b, bstk);
+        b = begin_cell().store_uint(db & (pow2(ke) - 1), ke);
+        free = 1023 - ke;
+        ;; } elseif (av == free) {
+      } else {
+        bstk = cons(b, bstk);
+        b = begin_cell();
+        free = 1023;
+      }
+      buf = buf & (pow2(mx) - 1);
+      len = mx;
+      - }
+    }
+    -}
+    if (len > bs) {
+      len = bs;
+      b = b.store_int((buf & topmask) != 0, 1);
+      if (b.brembits() == 0) {
+        bstk = cons(b, bstk);
+        b = begin_cell();
+      }
+      buf &= botmask;
+      if (buf == flag) {
+        len = vs;
+        buf = value;
+        flush = true;
+      }
+    }
+    ;; if ((flush == false) & (len == bs)) {
+    elseif (len == bs) {
+      if (buf == flag) {
+        len = vs;
+        buf = value;
+        flush = true;
+      }
+    }
+    if (flush | s.slice_empty?()) {
+      int av = min(b.brembits(), len);
+      int ke = len - av;
+      b = b.store_uint(buf >> ke, av);
+      if (ke > 0) {
+        bstk = cons(b, bstk);
+        b = begin_cell().store_uint(buf & (pow2(ke) - 1), ke);
+      ;; } elseif (av == free) {
+      } elseif (b.brembits() == 0) {
+        bstk = cons(b, bstk);
+        b = begin_cell();
+      }
+      buf = 0;
+      len = 0;
+      flush = false;
+    }
+    if (s.slice_data_empty?()) {
+      if (s.slice_refs() >= 1) {
+        cell c = s~load_ref();
+        s = c.begin_parse();
+      }
+    }
+  } until (s.slice_empty?())
+  while (bstk.null?() == false) {
+    b = bstk~list_next().store_ref(b.end_cell());
+  }
+  return b.end_cell();
+}
+

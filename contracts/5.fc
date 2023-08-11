@@ -13,6 +13,8 @@
   1923063428480944139667114773918309212080528]
 -}
 
+forall X -> tuple _unsafe_tuple(X x) asm "NOP";
+
 () recv_internal() {
 }
 
@@ -23,6 +25,9 @@
   int a = 0;
   int b = 1;
   tuple r = empty_tuple();
+  if (k == 0) {
+    return r;
+  }
   if (n > 0) {
     int rem = n;
     if (n >= 350) {
@@ -58,6 +63,17 @@
       (a, b) = (b, a + b);
     }
     if (k > 0) {
+      if (k == 1) {
+        return [b]._unsafe_tuple();
+      } elseif (k == 2) {
+        return [b, a + b]._unsafe_tuple();
+      } elseif (k == 3) {
+        return [b, a + b, a + b + b]._unsafe_tuple();
+      } elseif (k == 4) {
+        return [b, a + b, a + b + b, a + a + 3 * b]._unsafe_tuple();
+      } elseif (k == 5) {
+        return [b, a + b, a + b + b, a + a + 3 * b, 3 * a + 5 * b]._unsafe_tuple();
+      }
       repeat (k - 1) {
         r~tpush(b);
         (a, b) = (b, a + b);
@@ -66,6 +82,17 @@
     }
   } else {
     if (k > 0) {
+      if (k == 1) {
+        return [a]._unsafe_tuple();
+      } elseif (k == 2) {
+        return [a, b]._unsafe_tuple();
+      } elseif (k == 3) {
+        return [a, b, a + b]._unsafe_tuple();
+      } elseif (k == 4) {
+        return [a, b, a + b, a + b + b]._unsafe_tuple();
+      } elseif (k == 5) {
+        return [a, b, a + b, a + b + b, a + a + 3 * b]._unsafe_tuple();
+      }
       repeat (k - 1) {
         r~tpush(a);
         (a, b) = (b, a + b);
