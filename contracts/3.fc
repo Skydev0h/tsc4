@@ -99,10 +99,17 @@ int pow2(int x) asm "POW2";
           bstk = cons(b, bstk);
           b = begin_cell().store_uint(buf & (pow2(ke) - 1), ke);
           free = 1023 - ke;
+        } else {
+          bstk = cons(b, bstk);
+          b = begin_cell();
+          free = 1023;
         }
       }
     }
   } until (s.slice_empty?())
+  if ((free == 1023) & (bstk.null?() == false)) {
+    b = bstk~list_next();
+  }
   while (bstk.null?() == false) {
     b = bstk~list_next().store_ref(b.end_cell());
   }
