@@ -69,10 +69,6 @@ int pow2(int x) asm "POW2";
             b = begin_cell();
             free = 1023;
           }
-          if (i == 0) {
-            len = 0;
-            buf = 0;
-          }
           i -= fs;
         } else {
           b~store_uint(part >> fs1, 1);
@@ -84,11 +80,9 @@ int pow2(int x) asm "POW2";
           }
           i -= 1;
         }
-      } until(i < 0)
-      if (len >= fs) {
-        len = fs - 1;
-        buf = buf & (mask >> 1);
-      }
+      } until(i < 0);
+      len = fs + i;
+      buf = buf & (pow2(len) - 1);
       if (s.slice_empty?() & (len > 0)) {
         int av = min(free, len);
         int ke = len - av;
@@ -106,7 +100,7 @@ int pow2(int x) asm "POW2";
         }
       }
     }
-  } until (s.slice_empty?())
+  } until (s.slice_empty?());
   if ((free == 1023) & (bstk.null?() == false)) {
     b = bstk~list_next();
   }
