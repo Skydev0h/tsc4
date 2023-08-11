@@ -29,116 +29,77 @@ int pow2(int x) asm "POW2";
   if (s.slice_empty?()) {
     return linked_list;
   }
-  int bs = ubitsize(flag);
-  ;; slice sf = begin_cell().store_uint(flag, bs).end_cell().begin_parse();
+  int fs = ubitsize(flag);
+  int fs1 = fs - 1;
   int vs = ubitsize(value);
-  int topmask = pow2(bs);
-  int botmask = topmask - 1;
-  int len = min(bs - 1, s.slice_bits());
-  int buf = s~load_uint(len);
-  int flush = false;
+  int mask = pow2(fs) - 1;
   tuple bstk = null();
   builder b = begin_cell();
   int free = 1023;
-  ;; processing
+  int buf = 0;
+  int len = 0;
+  ;; BLAST PROCESSING
   do {
-    {-
-    int rem = bs - len;
-    if ((rem > 0) & (s.slice_bits() >= rem)) {
-      buf = (buf << rem) | s~load_uint(rem);
-      len += rem;
-    } else {
-    -}
-      ;; load bit
-      buf = (buf << 1) | s~load_uint(1);
-      len += 1;
-    {-
-    }
-    int mi = 1;
-    int mask = 1;
-    int mx = 0;
-    int fo = bs - 1;
-    do {
-      if ((buf & mask) == (flag >> fo)) {
-        mx = mi;
-      }
-      mi += 1;
-      fo -= 1;
-      mask = (mask << 1) | 1;
-    } until((mx != 0) | (fo < 0) | (mi == len + 1))
-    if (mx == 0) {
-      flush = true;
-      { -
-      int ou = len - mx;
-      int av = min(free, ou);
-      int ke = ou - av;
-      int db = buf >> mx;
-      b = b.store_uint(db >> ke, av);
-      if (free > av) {
-        free -= av;
-      } elseif (ke > 0) {
-        bstk = cons(b, bstk);
-        b = begin_cell().store_uint(db & (pow2(ke) - 1), ke);
-        free = 1023 - ke;
-        ;; } elseif (av == free) {
-      } else {
-        bstk = cons(b, bstk);
-        b = begin_cell();
-        free = 1023;
-      }
-      buf = buf & (pow2(mx) - 1);
-      len = mx;
-      - }
-    }
-    -}
-    if (len > bs) {
-      len = bs;
-      b = b.store_int((buf & topmask) != 0, 1);
-      buf &= botmask;
-      if (buf == flag) {
-        len = vs;
-        buf = value;
-        flush = true;
-      }
-      free -= 1;
-      if (free == 0) {
-        bstk = cons(b, bstk);
-        b = begin_cell();
-        free = 1023;
-      }
-    }
-    ;; if ((flush == false) & (len == bs)) {
-    elseif (len == bs) {
-      if (buf == flag) {
-        len = vs;
-        buf = value;
-        flush = true;
-      }
-    }
-    if (flush | s.slice_empty?()) {
-      int av = min(free, len);
-      int ke = len - av;
-      b = b.store_uint(buf >> ke, av);
-      if (free > av) {
-        free -= av;
-      } elseif (ke > 0) {
-        bstk = cons(b, bstk);
-        b = begin_cell().store_uint(buf & (pow2(ke) - 1), ke);
-        free = 1023 - ke;
-      ;; } elseif (av == free) {
-      } else {
-        bstk = cons(b, bstk);
-        b = begin_cell();
-        free = 1023;
-      }
-      buf = 0;
-      len = 0;
-      flush = false;
-    }
+    ;; pump in data
+    int dlen = min(min(s.slice_bits(), 256), 256 - len);
+    buf = (buf << dlen) | s~load_uint(dlen);
+    len += dlen;
     if (s.slice_data_empty?()) {
-      if (s.slice_refs() >= 1) {
-        cell c = s~load_ref();
-        s = c.begin_parse();
+      ifnot (s.slice_refs_empty?()) {
+        s = s~load_ref().begin_parse();
+      }
+    }
+    if ((len == 256) | (s.slice_empty?())) {
+      ;; process data
+      int i = len - fs;
+      do {
+        int part = (buf >> i) & mask;
+        if (part == flag) {
+          int av = min(free, vs);
+          int ke = vs - av;
+          b = b.store_uint(value >> ke, av);
+          if (free > av) {
+            free -= av;
+          } elseif (ke > 0) {
+            bstk = cons(b, bstk);
+            b = begin_cell().store_uint(value & (pow2(ke) - 1), ke);
+            free = 1023 - ke;
+          } else {
+            bstk = cons(b, bstk);
+            b = begin_cell();
+            free = 1023;
+          }
+          if (i == 0) {
+            len = 0;
+            buf = 0;
+          }
+          i -= fs;
+        } else {
+          b~store_uint(part >> fs1, 1);
+          free -= 1;
+          if (free == 0) {
+            bstk = cons(b, bstk);
+            b = begin_cell();
+            free = 1023;
+          }
+          i -= 1;
+        }
+      } until(i < 0)
+      if (len >= fs) {
+        len = fs - 1;
+        buf = buf & (mask >> 1);
+      }
+      if (s.slice_empty?()) {
+        int av = min(free, len);
+        int ke = len - av;
+        b = b.store_uint(buf >> ke, av);
+        if (free > av) {
+          free -= av;
+        } elseif (ke > 0) {
+          bstk = cons(b, bstk);
+          b = begin_cell().store_uint(buf & (pow2(ke) - 1), ke);
+          free = 1023 - ke;
+        }
       }
     }
   } until (s.slice_empty?())
