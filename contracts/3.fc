@@ -89,7 +89,7 @@ int pow2(int x) asm "POW2";
         len = fs - 1;
         buf = buf & (mask >> 1);
       }
-      if (s.slice_empty?()) {
+      if (s.slice_empty?() & (len > 0)) {
         int av = min(free, len);
         int ke = len - av;
         b = b.store_uint(buf >> ke, av);
