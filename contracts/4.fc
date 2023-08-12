@@ -6,44 +6,58 @@
   character should go to the beginning. Return new text encoded in cell.
 -}
 
-const int range = 26;
-
 () recv_internal() {
 }
+
+;; ns c | 0 1 2 3 4 ... ns c
+tuple caesar_lt(int ns) asm """
+  // ns
+  0 PUSHINT
+  65 PUSHINT
+  // ns 0 | 0 ns 0 | 0 ns 1 | 0 1 ns 1 | 0 1 ns 2
+  REPEAT:<{ TUCK INC }>
+  // 0 1 2 3 ... 64 NS 65
+  // capital letters
+  // 0 1 2 ... 63 64 . NS 65
+  26 PUSHINT 
+  s2 PUSH
+  SUB
+  // 0 1 2 ... 63 64 . NS 65 (NS+65)
+  REPEAT:<{ DUP2 ADD -ROT INC }>
+  // 0 1 2 ... 63 64 . (65+NS) (66+NS) ... NS C
+  OVER
+  REPEAT:<{ DUP2 ADD -26 ADDCONST -ROT INC }>
+  // [ \ ] ^ _ ` C
+  TUCK INC TUCK INC TUCK INC TUCK INC TUCK INC TUCK INC
+  // small letters
+  26 PUSHINT 
+  s2 PUSH
+  SUB
+  REPEAT:<{ DUP2 ADD -ROT INC }>
+  OVER
+  REPEAT:<{ DUP2 ADD -26 ADDCONST -ROT INC }>
+  // NS no more needed | ... NS C=123
+  2DROP
+  123 PUSHINT
+  132 PUSHINT
+  REPEAT:<{ DUP INC }>
+  TUPLEVAR
+""";
 
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
   tuple bstk = null();
   builder b = begin_cell();
   slice s = text.begin_parse();
-  int ns = (shift + range) % range;
+  int ns = (shift + 26) % 26;
   b = b.store_uint(s~load_uint(32), 32);
 
-  tuple cmap = empty_tuple();
-  int c = 0;
-  repeat("A"u) { cmap~tpush(c); c += 1; }
-  repeat(range - ns) { cmap~tpush(c + ns); c += 1; }
-  repeat(ns) { cmap~tpush(c + ns - range); c += 1; }
-  repeat("a"u - "["u) { cmap~tpush(c); c += 1; }
-  repeat(range - ns) { cmap~tpush(c + ns); c += 1; }
-  repeat(ns) { cmap~tpush(c + ns - range); c += 1; }
-  repeat(254 - "z"u) { cmap~tpush(c); c += 1; }
+  tuple cmap = caesar_lt(ns);
 
   do {
     int len = s.slice_bits() / 8;
     repeat (len) {
       b~store_uint(cmap.at(s~load_uint(8)), 8);
-      {-
-      int c = s~load_uint(8);
-      if ( (c >= "a"u) & (c <= "z"u) ) {
-        c += ns;
-        c += range * (c > "z"u);
-      } elseif ( (c >= "A"u) & (c <= "Z"u) ) {
-        c += ns;
-        c += range * (c > "Z"u);
-      }
-      b~store_uint(c, 8);
-      -}
     }
     if (s.slice_refs() != 0) {
       bstk = cons(b, bstk);
@@ -59,6 +73,6 @@ const int range = 26;
 
 ;; testable
 (cell) caesar_cipher_decrypt(int shift, cell text) method_id {
-  return caesar_cipher_encrypt(range - shift, text);
+  return caesar_cipher_encrypt(26 - shift, text);
 }
 
