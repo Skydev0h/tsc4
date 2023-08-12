@@ -17,13 +17,11 @@ const int range = 26;
   builder b = begin_cell();
   slice s = text.begin_parse();
   int ns = (shift + range) % range;
-  tuple cmap = empty_tuple();
   b = b.store_uint(s~load_uint(32), 32);
   do {
     int len = s.slice_bits() / 8;
     repeat (len) {
       int c = s~load_uint(8);
-      throw_if(99, c == 255);
       if ( (c >= "a"u) & (c <= "z"u) ) {
         c += ns;
         c += range * (c > "z"u);
