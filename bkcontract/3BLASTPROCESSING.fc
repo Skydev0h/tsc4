@@ -52,13 +52,9 @@ int pow2(int x) asm "POW2";
     if ((len == 256) | (s.slice_empty?())) {
       ;; process data
       int i = len - fs;
-      int f = i;
       do {
         int part = (buf >> i) & mask;
         if (part == flag) {
-          if (f != i) {
-
-          }
           int av = min(free, vs);
           int ke = vs - av;
           b = b.store_uint(value >> ke, av);
@@ -74,9 +70,7 @@ int pow2(int x) asm "POW2";
             free = 1023;
           }
           i -= fs;
-          f = i;
         } else {
-          {-
           b~store_uint(part >> fs1, 1);
           free -= 1;
           if (free == 0) {
@@ -84,7 +78,6 @@ int pow2(int x) asm "POW2";
             b = begin_cell();
             free = 1023;
           }
-          -}
           i -= 1;
         }
       } until(i < 0);
