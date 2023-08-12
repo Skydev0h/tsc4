@@ -57,7 +57,22 @@ int pow2(int x) asm "POW2";
         int part = (buf >> i) & mask;
         if (part == flag) {
           if (f != i) {
-
+            int size = f - i;
+            int dump = (buf >> (i + fs)) & (pow2(size) - 1);
+            int av_ = min(free, size);
+            int ke_ = size - av_;
+            b = b.store_uint(dump >> ke_, av_);
+            if (free > av_) {
+              free -= av_;
+            } elseif (ke_ > 0) {
+              bstk = cons(b, bstk);
+              b = begin_cell().store_uint(dump & (pow2(ke_) - 1), ke_);
+              free = 1023 - ke_;
+            } else {
+              bstk = cons(b, bstk);
+              b = begin_cell();
+              free = 1023;
+            }
           }
           int av = min(free, vs);
           int ke = vs - av;
@@ -88,6 +103,24 @@ int pow2(int x) asm "POW2";
           i -= 1;
         }
       } until(i < 0);
+      if (f != i) {
+        int size = f - i;
+        int dump = (buf >> (i + fs)) & (pow2(size) - 1);
+        int av_ = min(free, size);
+        int ke_ = size - av_;
+        b = b.store_uint(dump >> ke_, av_);
+        if (free > av_) {
+          free -= av_;
+        } elseif (ke_ > 0) {
+          bstk = cons(b, bstk);
+          b = begin_cell().store_uint(dump & (pow2(ke_) - 1), ke_);
+          free = 1023 - ke_;
+        } else {
+          bstk = cons(b, bstk);
+          b = begin_cell();
+          free = 1023;
+        }
+      }
       len = fs + i;
       buf = buf & (pow2(len) - 1);
       if (s.slice_empty?() & (len > 0)) {
