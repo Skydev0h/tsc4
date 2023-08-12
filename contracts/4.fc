@@ -17,13 +17,24 @@ const int range = 26;
   builder b = begin_cell();
   slice s = text.begin_parse();
   int ns = (shift + range) % range;
-  tuple cmap = empty_tuple();
   b = b.store_uint(s~load_uint(32), 32);
+
+  tuple cmap = empty_tuple();
+  int c = 0;
+  repeat("A"u) { cmap~tpush(c); c += 1; }
+  repeat(range - ns) { cmap~tpush(c + ns); c += 1; }
+  repeat(ns) { cmap~tpush(c + ns - range); c += 1; }
+  repeat("a"u - "["u) { cmap~tpush(c); c += 1; }
+  repeat(range - ns) { cmap~tpush(c + ns); c += 1; }
+  repeat(ns) { cmap~tpush(c + ns - range); c += 1; }
+  repeat(254 - "z"u) { cmap~tpush(c); c += 1; }
+
   do {
     int len = s.slice_bits() / 8;
     repeat (len) {
+      b~store_uint(cmap.at(s~load_uint(8)), 8);
+      {-
       int c = s~load_uint(8);
-      throw_if(99, c == 255);
       if ( (c >= "a"u) & (c <= "z"u) ) {
         c += ns;
         c += range * (c > "z"u);
@@ -32,6 +43,7 @@ const int range = 26;
         c += range * (c > "Z"u);
       }
       b~store_uint(c, 8);
+      -}
     }
     if (s.slice_refs() != 0) {
       bstk = cons(b, bstk);
