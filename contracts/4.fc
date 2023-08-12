@@ -9,6 +9,7 @@
 () recv_internal() {
 }
 
+{-
 ;; ns c | 0 1 2 3 4 ... ns c
 tuple caesar_lt(int ns) asm """
   // ns
@@ -43,16 +44,28 @@ tuple caesar_lt(int ns) asm """
   REPEAT:<{ DUP INC }>
   TUPLEVAR
 """;
+-}
+
+const int range = 26;
 
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
   tuple bstk = null();
   builder b = begin_cell();
   slice s = text.begin_parse();
-  int ns = (shift + 26) % 26;
+  int ns = (shift + range) % range;
   b = b.store_uint(s~load_uint(32), 32);
 
-  tuple cmap = caesar_lt(ns);
+  ;; tuple cmap = caesar_lt(ns);
+  tuple cmap = empty_tuple();
+  int c = 0;
+  repeat("A"u) { cmap~tpush(c); c += 1; }
+  repeat(range - ns) { cmap~tpush(c + ns); c += 1; }
+  repeat(ns) { cmap~tpush(c + ns - range); c += 1; }
+  repeat("a"u - "["u) { cmap~tpush(c); c += 1; }
+  repeat(range - ns) { cmap~tpush(c + ns); c += 1; }
+  repeat(ns) { cmap~tpush(c + ns - range); c += 1; }
+  repeat(254 - "z"u) { cmap~tpush(c); c += 1; }
 
   do {
     int len = s.slice_bits() / 8;
