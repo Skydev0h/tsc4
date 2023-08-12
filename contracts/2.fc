@@ -33,65 +33,8 @@ forall X -> (tuple, ()) ~tset(tuple t, X value, int index) asm "SETINDEXVAR";
 ;; 12*1+13*5	12*2+13*6	12*3+13*7	12*4+13*8
 ;; 14*1+15*5	14*2+15*6	14*3+15*7	14*4+15*8
 
-const int range = 26;
-
-forall X -> tuple _unsafe_tuple(X x) asm "NOP";
-
-;; ns c | 0 1 2 3 4 ... ns c
-tuple caesar_lt(int ns) asm """
-  // ns
-  0 PUSHINT
-  65 PUSHINT
-  // ns 0 | 0 ns 0 | 0 ns 1 | 0 1 ns 1 | 0 1 ns 2
-  REPEAT:<{ TUCK INC }>
-  // 0 1 2 3 ... 64 NS 65
-  DUMPSTK
-  // capital letters
-  // 0 1 2 ... 63 64 . NS 65
-  26 PUSHINT 
-  s2 PUSH
-  SUB
-  // 0 1 2 ... 63 64 . NS 65 (NS+65)
-  REPEAT:<{ DUP2 ADD -ROT INC }>
-  // 0 1 2 ... 63 64 . (65+NS) (66+NS) ... NS C
-  OVER
-  REPEAT:<{ DUP2 ADD -26 ADDCONST -ROT INC }>
-  // [ \ ] ^ _ ` C
-  TUCK INC TUCK INC TUCK INC TUCK INC TUCK INC TUCK INC
-  // small letters
-  26 PUSHINT 
-  s2 PUSH
-  SUB
-  REPEAT:<{ DUP2 ADD -ROT INC }>
-  OVER
-  REPEAT:<{ DUP2 ADD -26 ADDCONST -ROT INC }>
-  // NS no more needed | ... NS C=123
-  2DROP
-  123 PUSHINT
-  132 PUSHINT
-  REPEAT:<{ DUP INC }>
-  TUPLEVAR
-""";
-
 ;; testable
 (tuple) matrix_multiplier(tuple matrixA, tuple matrixB) method_id {
-
-  tuple clt = caesar_lt(4);
-
-  tuple cmap = empty_tuple();
-  int c = 0;
-  int ns = 4;
-  repeat("A"u) { cmap~tpush(c); c += 1; }
-  repeat(range - ns) { cmap~tpush(c + ns); c += 1; }
-  repeat(ns) { cmap~tpush(c + ns - range); c += 1; }
-  repeat("a"u - "["u) { cmap~tpush(c); c += 1; }
-  repeat(range - ns) { cmap~tpush(c + ns); c += 1; }
-  repeat(ns) { cmap~tpush(c + ns - range); c += 1; }
-  repeat(254 - "z"u) { cmap~tpush(c); c += 1; }
-
-  return [cmap, clt]._unsafe_tuple();
-
-  {-
   int n = tlen(matrixA);
   int m = tlen(first(matrixA));
   int m1 = tlen(matrixB);
@@ -156,6 +99,5 @@ tuple caesar_lt(int ns) asm """
   }
 
   return C;
-  -}
 }
 
