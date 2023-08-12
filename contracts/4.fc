@@ -22,6 +22,7 @@ const int range = 26;
     int len = s.slice_bits() / 8;
     repeat (len) {
       int c = s~load_uint(8);
+      throw_if(99, c >= 128);
       if ( (c >= "a"u) & (c <= "z"u) ) {
         c += ns;
         c += range * (c > "z"u);
