@@ -76,19 +76,21 @@ int pow2(int x) asm "POW2";
               free = 1023 - over;
             }
           }
-          int av = min(free, vs);
-          int ke = vs - av;
-          b = b.store_uint(value >> ke, av);
-          if (free > av) {
-            free -= av;
-          } elseif (ke > 0) {
-            bstk = cons(b, bstk);
-            b = begin_cell().store_uint(value & (pow2(ke) - 1), ke);
-            free = 1023 - ke;
+          ;; pump out replaced value
+          if (vs <= free) {
+            b~store_uint(value, vs);
+            free -= vs;
+            if (free == 0) {
+              bstk = cons(b, bstk);
+              b = begin_cell();
+              free = 1023;
+            }
           } else {
+            int over = vs - free;
+            b~store_uint(value >> over, free);
             bstk = cons(b, bstk);
-            b = begin_cell();
-            free = 1023;
+            b = begin_cell().store_uint(value & (pow2(over) - 1), over);
+            free = 1023 - over;
           }
           i -= fs;
           f = i;
@@ -119,19 +121,21 @@ int pow2(int x) asm "POW2";
       len = fs + i;
       buf = buf & (pow2(len) - 1);
       if (s.slice_empty?() & (len > 0)) {
-        int av = min(free, len);
-        int ke = len - av;
-        b = b.store_uint(buf >> ke, av);
-        if (free > av) {
-          free -= av;
-        } elseif (ke > 0) {
-          bstk = cons(b, bstk);
-          b = begin_cell().store_uint(buf & (pow2(ke) - 1), ke);
-          free = 1023 - ke;
+        ;; pump out last of data
+        if (len <= free) {
+          b~store_uint(buf, len);
+          free -= len;
+          if (free == 0) {
+            bstk = cons(b, bstk);
+            b = begin_cell();
+            free = 1023;
+          }
         } else {
+          int over = len - free;
+          b~store_uint(buf >> over, free);
           bstk = cons(b, bstk);
-          b = begin_cell();
-          free = 1023;
+          b = begin_cell().store_uint(buf & (pow2(over) - 1), over);
+          free = 1023 - over;
         }
       }
     }

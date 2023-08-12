@@ -82,7 +82,7 @@ describe('Task3', () => {
             else
                 rc = null;
         }
-        console.log("2552985");
+        console.log("685068 2552985");
         console.log(r.gasUsed.toString())
     });
 });
