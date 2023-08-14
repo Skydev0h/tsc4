@@ -1,0 +1,104 @@
+// automatically generated from `imports/stdlib.fc` `1.fc` 
+DECLPROC recv_internal
+92939 DECLMETHOD find_branch_by_hash
+DECLPROC find_slower
+DECLGLOBVAR h
+recv_internal PROC:<{
+}>
+find_branch_by_hash PROC:<{
+  NEWC
+  ENDC
+  s2 PUSH
+  68134197439415885698044414435951397869210496020759160419881882418413283430343 PUSHINT
+  EQUAL
+  IFJMP:<{
+    2 1 BLKDROP2
+  }>
+  s0 s2 XCHG
+  h SETGLOB
+  0 PUSHINT
+  PUSHNULL
+  ROT
+    SAMEALTSAVE
+    // zero 0 null tree
+    AGAIN:<{
+      // zero 0 null ...?
+      DUP ISNULL
+      // zero 0 null null??
+      IFJMP:<{ 
+        // zero 0 null
+        DROP 
+        // zero 0
+        ONLYTOP 
+        // zero
+        RETALT 
+      }>
+      // ... cell
+      DUP 
+      // ... cell cell
+      HASHCU 
+      // ... cell h(cell)
+      h GETGLOB 
+      // ... cell h(cell) h
+      EQUAL 
+      // ... cell h(cell)?=h
+      IFJMP:<{ 
+        // ... cell
+        0 PUSHINT 
+        // ... cell 0
+        ONLYTOP 
+        // cell
+        RETALT 
+      }>
+      CTOS 
+      // ... slice
+      DUP SREFS
+      // ... slice refs(slice)
+      REPEAT:<{
+        // ... slice
+        LDREF
+        // ... slice ref_cell
+        SWAP
+        // ... ref_cell slice
+      }>
+      // ... slice
+      DROP
+      // ...
+    }>
+}>
+find_slower PROC:<{
+  c2 SAVE
+  SAMEALTSAVE
+  PUSHNULL
+  CONS
+  WHILE:<{
+    DUP
+    ISNULL
+    NOT
+  }>DO<{
+    UNCONS
+    OVER
+    HASHCU
+    s3 PUSH
+    EQUAL
+    IFJMP:<{
+      DROP
+      NIP
+      RETALT
+    }>
+    SWAP
+    CTOS
+    DUP
+    SREFS
+    REPEAT:<{
+      LDREF
+      s0 s2 XCHG
+      CONS
+      SWAP
+    }>
+    DROP
+  }>
+  2DROP
+  NEWC
+  ENDC
+}>
