@@ -13,13 +13,38 @@
   1923063428480944139667114773918309212080528]
 -}
 
+global int gk;
+
 () recv_internal() {
 }
 
-forall X -> tuple _unsafe_tuple(X x) asm "NOP";
+tuple build_fibo_seq_left(int a, int b, int k1) asm """
+  // a b k1
+  REPEAT:<{
+    // a b
+    DUP2
+    // a b a b
+    ADD
+    // a b a+b
+  }>
+  DROP
+  gk GETGLOB
+  TUPLEVAR
+""";
 
-tuple tup10(int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10) asm "10 TUPLE";
-tuple tup15(int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12, int x13, int x14, int x15) asm "15 TUPLE";
+tuple build_fibo_seq_right(int a, int b, int k1) asm """
+  // a b k1
+  REPEAT:<{
+    // a b
+    DUP2
+    // a b a b
+    ADD
+    // a b a+b
+  }>
+  gk GETGLOB
+  TUPLEVAR
+  NIP
+""";
 
 ;; testable
 (tuple) fibonacci_sequence (int n, int k) method_id {
@@ -27,10 +52,9 @@ tuple tup15(int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int 
   ;; but with pivots and neat trick
   int a = 0;
   int b = 1;
-  tuple r = empty_tuple();
-  if (k == 0) {
-    return r;
-  }
+  if (k == 0) { return empty_tuple(); }
+  gk = k;
+  k -= 1;
   if (n > 0) {
     int rem = n;
     if (n >= 350) { a = 6254449428820551641549772190170184190608177514674331726439961915653414425; b = 10119911756749018713965376799211044556615579094364594923736162239653346274; rem -= 350; }
@@ -43,22 +67,23 @@ tuple tup15(int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int 
     repeat (rem - 1) {
       (a, b) = (b, a + b);
     }
-    if (k > 0) {
-      repeat (k - 1) {
-        r~tpush(b);
-        (a, b) = (b, a + b);
-      }
+    return build_fibo_seq_right(a, b, k);
+    {-
+    repeat (k - 1) {
       r~tpush(b);
+      (a, b) = (b, a + b);
     }
+    r~tpush(b);
+    -}
   } else {
-    if (k > 0) {
-      repeat (k - 1) {
-        r~tpush(a);
-        (a, b) = (b, a + b);
-      }
+    return build_fibo_seq_left(a, b, k);
+    {-
+    repeat (k - 1) {
       r~tpush(a);
+      (a, b) = (b, a + b);
     }
+    r~tpush(a);
+    -}
   }
-  return r;
 }
 
