@@ -11,21 +11,11 @@ global int h;
 () recv_internal() {
 }
 
-cell fast_find(cell zero, int oneint, tuple null, cell tree) asm """
+cell fast_find(tuple null, cell tree) asm """
   SAMEALTSAVE
+  <{ NEWC ENDC 1 PUSHINT ONLYTOPX RETALT }> CONT c2 POP
   // zero 1 null tree
   AGAIN:<{
-    // zero 1 null ...?
-    DUP ISNULL
-    // zero 1 null null??
-    IFJMP:<{ 
-      // zero 1 null
-      DROP 
-      // zero 1
-      ONLYTOPX
-      // zero
-      RETALT 
-    }>
     // ... cell
     DUP 
     // ... cell cell
@@ -46,7 +36,7 @@ cell fast_find(cell zero, int oneint, tuple null, cell tree) asm """
     CTOS 
     // ... slice
     DUP SREFS
-    // ... slice refs(slice)
+    // ... slice refs(slice) 
     REPEAT:<{
       // ... slice
       LDREF
@@ -65,7 +55,7 @@ cell fast_find(cell zero, int oneint, tuple null, cell tree) asm """
     return zero; ;; empty cell hash
   }
   h = hash;
-  return fast_find(zero, 1, null(), tree);
+  return fast_find(null(), tree);
   {-
   tuple stack = null();
   stack = cons(tree, stack);
@@ -81,20 +71,4 @@ cell fast_find(cell zero, int oneint, tuple null, cell tree) asm """
   }
   return begin_cell().end_cell();
   -}
-}
-
-(cell) find_slower(int hash, cell tree) {
-  tuple stack = null();
-  stack = cons(tree, stack);
-  while (~ stack.null?()) {
-    cell c = stack~list_next();
-    if (cell_hash(c) == hash) {
-      return c;
-    }
-    slice s = c.begin_parse();
-    repeat (s.slice_refs()) {
-      stack = cons(s~load_ref(), stack);
-    }
-  }
-  return begin_cell().end_cell();
 }
