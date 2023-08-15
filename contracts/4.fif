@@ -1,0 +1,137 @@
+// automatically generated from `imports/stdlib.fc` `4.fc` 
+DECLPROC recv_internal
+76319 DECLMETHOD caesar_cipher_encrypt
+86492 DECLMETHOD caesar_cipher_decrypt
+recv_internal PROC:<{
+}>
+caesar_cipher_encrypt PROC:<{
+  PUSHNULL
+  NEWC
+  s0 s2 XCHG
+  CTOS
+  s0 s3 XCHG
+  26 ADDCONST
+  26 PUSHINT
+  MOD
+  s0 s3 XCHG
+  32 LDU
+  s0 s3 XCHG
+  32 STU
+  NIL
+  0 PUSHINT
+  65 PUSHINT
+  REPEAT:<{
+    TUCK
+    TPUSH
+    SWAP
+    INC
+  }>
+  26 PUSHINT
+  s6 PUSH
+  SUB
+  REPEAT:<{
+    s0 s5 PUSH2
+    ADD
+    s1 s2 XCHG
+    TPUSH
+    SWAP
+    INC
+  }>
+  s5 PUSH
+  REPEAT:<{
+    s0 s5 PUSH2
+    ADD
+    -26 ADDCONST
+    s1 s2 XCHG
+    TPUSH
+    SWAP
+    INC
+  }>
+  6 PUSHINT
+  REPEAT:<{
+    TUCK
+    TPUSH
+    SWAP
+    INC
+  }>
+  26 PUSHINT
+  s6 PUSH
+  SUB
+  REPEAT:<{
+    s0 s5 PUSH2
+    ADD
+    s1 s2 XCHG
+    TPUSH
+    SWAP
+    INC
+  }>
+  s5 PUSH
+  REPEAT:<{
+    s0 s5 PUSH2
+    ADD
+    -26 ADDCONST
+    s1 s2 XCHG
+    TPUSH
+    SWAP
+    INC
+  }>
+  s5 POP
+  132 PUSHINT
+  REPEAT:<{
+    s4 PUSH
+    TPUSH
+    s0 s4 XCHG
+    INC
+    s0 s4 XCHG
+  }>
+  s4 POP
+  UNTIL:<{
+    s2 PUSH
+    SBITS
+    3 RSHIFT#
+    REPEAT:<{
+      s0 s2 XCHG
+      8 LDU
+      s4 s1 PUXC
+      INDEXVAR
+      s0 s3 XCHG2
+      8 STU
+    }>
+    s2 PUSH
+    SREFS
+    0 NEQINT
+    IF:<{
+      SWAP
+      CONS
+      NEWC
+      s0 s2 XCHG
+      LDREF
+      DROP
+      CTOS
+      s0 s2 XCHG
+    }>
+    s2 PUSH
+    SEMPTY
+  }>
+  2 2 BLKDROP2
+  WHILE:<{
+    OVER
+    ISNULL
+    0 EQINT
+  }>DO<{
+    ENDC
+    SWAP
+    UNCONS
+    -ROT
+    STREF
+  }>
+  NIP
+  ENDC
+}>
+caesar_cipher_decrypt PROC:<{
+  26 PUSHINT
+  ROT
+  SUB
+  SWAP
+  caesar_cipher_encrypt CALLDICT
+}>

@@ -77,10 +77,7 @@ forall X -> (tuple, ()) ~tset(tuple t, X value, int index) asm "SETINDEXVAR";
   }
 
   tuple C = empty_tuple();
-  int x = 0;
-  int y = 0;
   repeat(n) {
-    x = 0;
     tuple nt = empty_tuple();
     tuple left = mirrA~tpop();
     tuple right = transB;
@@ -92,10 +89,8 @@ forall X -> (tuple, ()) ~tset(tuple t, X value, int index) asm "SETINDEXVAR";
         z += le~tpop() * ri~tpop();
       }
       nt~tpush(z);
-      x += 1;
     }
     C~tpush(nt);
-    y += 1;
   }
 
   return C;

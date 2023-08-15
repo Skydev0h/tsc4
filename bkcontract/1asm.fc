@@ -1,0 +1,84 @@
+{-
+  TASK 1 - Find branch of the cell tree
+  Write the method that will find a branch of the tree by comparing its
+  hash with the hash received in the first parameter. When the algorithm finds
+  the subtree (branch) whose hash equals the received hash, the root cell of
+  this branch should be returned. Return empty cell if the branch is not found.
+-}
+
+global int h;
+
+() recv_internal() {
+}
+
+cell fast_find(cell zero, int oneint, tuple null, cell tree) asm """
+  SAMEALTSAVE
+  // zero 1 null tree
+  AGAIN:<{
+    // zero 1 null ...?
+    DUP ISNULL
+    // zero 1 null null??
+    IFJMP:<{ 
+      // zero 1 null
+      DROP 
+      // zero 1
+      ONLYTOPX
+      // zero
+      RETALT 
+    }>
+    // ... cell
+    DUP 
+    // ... cell cell
+    HASHCU 
+    // ... cell h(cell)
+    h GETGLOB 
+    // ... cell h(cell) h
+    EQUAL 
+    // ... cell h(cell)?=h
+    IFJMP:<{ 
+      // ... cell
+      1 PUSHINT 
+      // ... cell 1
+      ONLYTOPX 
+      // cell
+      RETALT 
+    }>
+    CTOS 
+    // ... slice
+    DUP SREFS
+    // ... slice refs(slice) 
+    REPEAT:<{
+      // ... slice
+      LDREF
+      // ... ref_cell slice'
+    }>
+    // ... slice
+    DROP
+    // ...
+  }>
+""";
+
+;; testable
+(cell) find_branch_by_hash(int hash, cell tree) method_id {
+  cell zero = begin_cell().end_cell();
+  if (hash == 68134197439415885698044414435951397869210496020759160419881882418413283430343) {
+    return zero; ;; empty cell hash
+  }
+  h = hash;
+  return fast_find(zero, 1, null(), tree);
+  {-
+  tuple stack = null();
+  stack = cons(tree, stack);
+  while (~ stack.null?()) {
+    cell c = stack~list_next();
+    if (cell_hash(c) == hash) {
+      return c;
+    }
+    slice s = c.begin_parse();
+    repeat (s.slice_refs()) {
+      stack = cons(s~load_ref(), stack);
+    }
+  }
+  return begin_cell().end_cell();
+  -}
+}

@@ -1,0 +1,111 @@
+// automatically generated from `imports/stdlib.fc` `2.fc` 
+DECLPROC recv_internal
+90041 DECLMETHOD matrix_multiplier
+recv_internal PROC:<{
+}>
+matrix_multiplier PROC:<{
+  OVER
+  TLEN
+  s2 PUSH
+  FIRST
+  TLEN
+  s2 PUSH
+  TLEN
+  s1 s(-1) PUXC
+  NEQ
+  99 THROWIF
+  s2 PUSH
+  FIRST
+  TLEN
+  NIL
+  s3 PUSH
+  REPEAT:<{
+    s0 s5 XCHG
+    TPOP
+    NIL
+    s4 PUSH
+    REPEAT:<{
+      SWAP
+      TPOP
+      s1 s2 XCHG
+      TPUSH
+    }>
+    NIP
+    s1 s6 XCHG
+    TPUSH
+  }>
+  s5 POP
+  NIL
+  OVER
+  REPEAT:<{
+    NIL
+    TPUSH
+  }>
+  s2 PUSH
+  REPEAT:<{
+    s0 s4 XCHG
+    TPOP
+    0 PUSHINT
+    s3 PUSH
+    REPEAT:<{
+      SWAP
+      TPOP
+      s7 s2 PUSH2
+      INDEXVAR
+      SWAP
+      TPUSH
+      s7 s0 s2 XC2PU
+      SETINDEXVAR
+      SWAP
+      INC
+      s1 s6 XCHG
+    }>
+    2DROP
+    s0 s4 XCHG
+  }>
+  s4 POP
+  NIL
+  0 PUSHINT
+  s0 s4 XCHG
+  REPEAT:<{
+    0 PUSHINT
+    NIL
+    s0 s7 XCHG
+    TPOP
+    s7 s4 PUSH2
+    REPEAT:<{
+      0 PUSHINT
+      s2 PUSH
+      s0 s2 XCHG
+      TPOP
+      s9 PUSH
+      REPEAT:<{
+        s0 s3 XCHG
+        TPOP
+        s0 s4 XCHG
+        TPOP
+        s1 s5 XCHG
+        MUL
+        s1 s3 XCHG
+        ADD
+        s0 s1 s3 XCHG3
+      }>
+      DROP
+      s2 POP
+      s1 s10 XCHG
+      TPUSH
+      s0 s3 XCHG
+      INC
+      s0 s3 XCHG
+      s0 s9 XCHG
+    }>
+    s2 s3 XCHG
+    3 BLKDROP
+    s0 s6 XCHG
+    TPUSH
+    s0 s3 XCHG
+    INC
+    s0 s3 XCHG
+  }>
+  5 1 BLKDROP2
+}>

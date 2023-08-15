@@ -54,6 +54,9 @@ const int range = 26;
   builder b = begin_cell();
   slice s = text.begin_parse();
   int ns = (shift + range) % range;
+  if (ns == 0) {
+    return text;
+  }
   b = b.store_uint(s~load_uint(32), 32);
 
   ;; tuple cmap = caesar_lt(ns);
