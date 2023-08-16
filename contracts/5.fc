@@ -63,7 +63,6 @@ tuple build_fibo_seq_right(int a, int b, int k1) asm """
 
 ;; testable
 (tuple) fibonacci_sequence (int n, int k) method_id {
-    throw_if(99, get_data().begin_parse().preload_uint(8) != 123);
   ;; dumb and basic
   ;; but with pivots and neat trick
   int a = 0;
