@@ -16,6 +16,7 @@
 global int gk;
 
 () recv_internal() {
+    {-
     int a = 0;
     int b = 1;
     cell dict = new_dict();
@@ -26,6 +27,7 @@ global int gk;
         (a, b, n) = (b, a + b, n + 1);
     }
     set_data(dict);
+    -}
 }
 
 tuple build_fibo_seq_left(int a, int b, int k1) asm "REPEAT:<{ DUP2 ADD }> DROP gk GETGLOB TUPLEVAR";
