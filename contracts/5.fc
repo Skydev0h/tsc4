@@ -16,7 +16,16 @@
 global int gk;
 
 () recv_internal() {
-    set_data(begin_cell().store_uint(123, 8).end_cell());
+    int a = 0;
+    int b = 1;
+    cell dict = new_dict();
+    ;; (cell, ()) ~udict_set_builder(cell dict, int key_len, int index, builder value) asm(value index dict key_len) "DICTUSETB";
+    int n = 1;
+    repeat(369) {
+        dict~udict_set_builder(9, n, begin_cell().store_uint(a, 256).store_uint(b, 256));
+        (a, b, n) = (b, a + b, n + 1);
+    }
+    set_data(dict);
 }
 
 tuple build_fibo_seq_left(int a, int b, int k1) asm "REPEAT:<{ DUP2 ADD }> DROP gk GETGLOB TUPLEVAR";
