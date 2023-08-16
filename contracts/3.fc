@@ -25,9 +25,6 @@ int pow2(int x) asm "POW2";
 
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
-  if (flag == value) {
-    return linked_list;
-  }
   slice s = linked_list.begin_parse();
   if (s.slice_empty?()) {
     return linked_list;
